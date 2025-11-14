@@ -7,9 +7,26 @@ const PORT = process.env.PORT || 5000;
 app.use(cors()); // Allow frontend to communicate
 app.use(express.json()); // Parse JSON body
 
-// Test route (health check)
+// Track active version
+let activeVersion = "Blue";
+let previousVersion = "Blue"; // Track previous for rollback
+
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    status: 'success',
+    message: '🚀 Backend server is up and running!',
+    version: activeVersion,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Health route
 app.get('/health', (req, res) => {
-  res.json({ status: 'Backend is running!' });
+  res.json({ 
+    status: 'Backend is running!',
+    version: activeVersion
+  });
 });
 
 // Example API route
@@ -17,14 +34,9 @@ app.get('/api/message', (req, res) => {
   res.json({ message: 'Hello from backend!' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-let activeVersion = "Blue"; // Track active version
-
 // Deploy (switch active version)
 app.post('/api/deploy', (req, res) => {
+  previousVersion = activeVersion;
   activeVersion = activeVersion === "Blue" ? "Green" : "Blue";
   res.json({
     version: activeVersion,
@@ -32,19 +44,18 @@ app.post('/api/deploy', (req, res) => {
   });
 });
 
-// Rollback (switch back)
+// Rollback (restore previous version)
 app.post('/api/rollback', (req, res) => {
-  activeVersion = activeVersion === "Blue" ? "Green" : "Blue";
+  const temp = activeVersion;
+  activeVersion = previousVersion;
+  previousVersion = temp;
   res.json({
     version: activeVersion,
     message: `Rollback done. Active version is ${activeVersion}`
   });
 });
 
-// Update health route to include version
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'Backend is running!',
-    version: activeVersion
-  });
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
