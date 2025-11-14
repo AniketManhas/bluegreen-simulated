@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 function App() {
-  const API_URL = "https://bluegreen-backend.onrender.com"; // Your Render backend URL
+  const API_URL = "https://bluegreen-simulated3.onrender.com"; // Your Render backend URL
 
   const [version, setVersion] = useState("");
   const [logs, setLogs] = useState([]);
